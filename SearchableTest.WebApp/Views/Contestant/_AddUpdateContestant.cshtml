@@ -1,0 +1,125 @@
+﻿@model SearchableTest.WebApp.Models.Dto.ContestantDto
+<div class="row">
+    <div class="col-lg-12">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <form class="form-horizontal" method="post" role="form" id="AddForm" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(model => model.Id)
+            <div class="form-horizontal">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Firstname, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-6">
+                        @Html.EditorFor(model => model.Firstname, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Firstname, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Lastname, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-6">
+                        @Html.EditorFor(model => model.Lastname, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Lastname, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.DOB, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-6">
+                        @Html.EditorFor(model => model.DOB, new { htmlAttributes = new { @class = "form-control datepicker" } })
+                        @Html.ValidationMessageFor(model => model.DOB, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Gender, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-6">
+                        <label class="radio-inline">@Html.RadioButtonFor(model => model.Gender, "Male") Male</label>
+                        <label class="radio-inline">@Html.RadioButtonFor(model => model.Gender, "Female") Female</label>
+                        @Html.ValidationMessageFor(model => model.Gender, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Address, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-6">
+                        @Html.EditorFor(model => model.Address, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Address, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.DistrictId, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-6">
+                        @Html.DropDownListFor(model => model.DistrictId, ViewBag.Districts as SelectList, "Select Districts", new { @class = "form-control" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.IsActive, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-6">
+                        @Html.EditorFor(model => model.IsActive, new { htmlAttributes = new { @class = "" } })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.ImgUrl, htmlAttributes: new { @class = "control-label col-md-4" })
+                    <div class="col-md-6">
+                        <input type="file" accept="image/*" name="ImgUrl" id="ImgUrl" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-offset-4 col-md-6">
+                        <button type="button" id="submitBtn" name="Submit" class="btn btn-primary">
+                            @if (Model.Id > 0)
+                            {<span>Update</span>}
+                            else
+                            { <span>Add</span>}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<style>
+    select + .select2-container {
+        width: 100% !important;
+    }
+</style>
+<script src="~/Scripts/jquery-ui-1.12.1.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function (e) {
+        $("form").removeData("validator");
+        $("form").removeData("unobtrusiveValidation");
+        $.validator.unobtrusive.parse($('form'));
+        $("#DistrictId").select2();
+        $(".datepicker").datepicker({
+            dateFormat: "yy-mm-dd",
+            changemonth: true,
+            changeyear: true
+        });
+
+        $("#submitBtn").click(function () {
+            $.validator.unobtrusive.parse($('#AddForm'));
+            var FormStatus = $('#AddForm').valid();
+            if (FormStatus) {
+                var formData = new FormData($('#AddForm')[0]);
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("AddEdit","Contestant")',
+                    data: formData,
+                    dataType: 'json',
+                    processData: false,
+                    contentType: false,
+                    success: function (data) {
+                        bootbox.alert(data.Message);
+                    }
+                });
+            }
+
+        });
+    });
+</script>
+

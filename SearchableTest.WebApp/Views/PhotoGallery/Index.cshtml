@@ -1,0 +1,140 @@
+﻿@model IEnumerable<SearchableTest.WebApp.Models.Dto.ContestantRatingDto>
+
+@{
+    ViewBag.Title = "Photo Gallery";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style type="text/css">
+    .card {
+        box-shadow: 0 4px 8px 0 rgb(255, 106, 0);
+        transition: 0.3s;
+        margin-right: 20px;
+        margin-bottom: 20px;
+        border: 1px solid red;
+    }
+
+        .card:hover {
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+        }
+</style>
+<div class="row">
+    <div style="border-bottom:1px solid Red;"></div>
+    <div class="col-lg-12">
+        <div class="panel">
+            <div class="panel-heading">
+                <h1>Photo Gallery</h1>
+            </div>
+            <div class="panel-body">
+                <ul style="list-style:none;" class="row">
+                    @foreach (var item in Model)
+                    {
+                        <li class="col-md-3 card">
+                            <a href="#">
+                                <img class="img" src="@Url.Action("Download", "PhotoGallery", new { Area ="" , path= item.ImagePath })" style="width:100%;height:180px;" />
+                            </a>
+                            @*<label>@item.FullName Average Rating @item.AverageRating</label>*@
+                            <p>@item.FullName Average Rating @item.AverageRating <button type="button" class="btn btn-primary btn-xs" data-id="@item.ContestantId" data-name="@item.FullName" id="RatingButton">Rate this contestant</button></p>
+                        </li>
+                    }
+                </ul>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="modal fade" id="AddContestantRating" tabindex="-1" role="dialog" aria-labelledby="AddContestantRatingLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="font-weight-bold text-primary">Contestant Rating</h5>
+            </div>
+            <div class="modal-body" id="myModalBodyDiv">
+                <!-- Nested Row within Card Body -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-horizontal">
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <label class="control-label" id="ContestantName"></label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-8">
+                                    <label class="radio-inline"><input id="1" name="RatingType" type="radio" value="1" checked />1</label>
+                                    <label class="radio-inline"><input id="2" name="RatingType" type="radio" value="2" />2</label>
+                                    <label class="radio-inline"><input id="3" name="RatingType" type="radio" value="3" />3</label>
+                                    <label class="radio-inline"><input id="4" name="RatingType" type="radio" value="4" />4</label>
+                                    <label class="radio-inline"><input id="5" name="RatingType" type="radio" value="5" />5</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-8">
+                                    <button type="button" id="submitBtn" class="btn btn-primary">Saving Rating</button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal" id="BtnClose">Exit</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts {
+    <script src="~/Content/jquery/bootbox.min.js"></script>
+    <script src="~/Scripts/jquery-ui-1.12.1.min.js"></script>
+    <script>
+        var contestantid = 0;
+        var rating = 0;
+        
+        $(document).on('click', '#RatingButton', function () {
+            contestantid = parseInt($(this).data("id"));
+            var contestantName = $(this).data("name");
+            $("#ContestantName").text("Contestant Name : " + contestantName);
+            $("#AddContestantRating").modal("show");
+        });
+
+        $('input[type="radio"]').on("click", function () {
+            if (this.id == "1") {
+                rating = 1;
+            }
+            else if (this.id == "2") {
+                rating = 2;
+            }
+            else if (this.id == "3") {
+                rating = 3
+            }
+            else if (this.id == "4") {
+                rating = 4
+            }
+            else if (this.id == "5") {
+                rating = 5
+            }
+            else {
+                rating = 0;
+            }
+        });
+
+        $("#submitBtn").click(function () {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("Rating","ContestantRating")',
+                data: { ContestantId: contestantid, Rating: rating },
+                dataType: "json",
+                success: function (data) {
+                    bootbox.alert(data.Message);
+                    contestantid = 0;
+                    rating = 0;
+                }
+            });
+        });
+
+    </script>
+}
+
+
+

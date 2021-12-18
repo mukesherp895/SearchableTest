@@ -1,0 +1,117 @@
+﻿@model IEnumerable<SearchableTest.WebApp.Models.Dto.ContestantDto>
+
+@{
+    ViewBag.Title = "Contestant";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/DataTables/dataTables.bootstrap4.min.css" rel="stylesheet" />
+    <link href="~/Content/DataTables/dataTables.searchHighlight.css" rel="stylesheet" />
+    <link href="~/Content/themes/base/jquery-ui.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+}
+<div class="container-fluid">
+    <div class="col-lg-12">
+        <div class="panel">
+            <div class="panel-heading">
+                <h1>Contestant</h1>
+                <button type="button" class="btn btn-primary" onclick="AddEditContestant(0)">Add Contestant</button>
+                <button class="btn btn-success btn-small" type="button" id="btnExport">Export</button>
+            </div>
+            <div class="panel-body">
+
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>DOB</th>
+                                <th>Gender</th>
+                                <th>Address</th>
+                                <th>District</th>
+                                <th>IsActive?</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <br />
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="AddContestant" tabindex="-1" role="dialog" aria-labelledby="AddContestantLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="lblHeading" class="font-weight-bold text-primary">Contestant Add</h5>
+            </div>
+            <div class="modal-body" id="myModalBodyDiv">
+                <!-- Nested Row within Card Body -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal" id="BtnClose">Exit</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts {
+    <script src="~/Content/DataTables/jquery.highlight.js"></script>
+    <script src="~/Content/DataTables/jquery.dataTables.min.js"></script>
+    <script src="~/Content/DataTables/dataTables.bootstrap4.min.js"></script>
+    <script src="~/Content/DataTables/dataTables.searchHighlight.min.js"></script>
+    <script src="~/Content/JS/Contestant.js"></script>
+    <script src="~/Content/jquery/bootbox.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script>
+        $("#BtnClose").click(function () {
+            var contestantTable = $('#dataTable').DataTable();
+            contestantTable.ajax.reload();
+        });
+
+        $(document).on('click', '#DeleteButton', function () {
+            var deleteid = $(this).data("id");
+            var contestantTable = $('#dataTable').DataTable();
+
+            bootbox.confirm("Do you really want to delete record?", function (result) {
+                if (result) {
+                    $.ajax({
+                        type: 'post',
+                        url: '@Url.Action("Delete","Contestant")',
+                        data: { id: deleteid },
+                        dataType: "json",
+                        success: function (data) {
+                            bootbox.alert(data.Message);
+                            contestantTable.ajax.reload();
+                        }
+                    });
+                }
+                else {
+		            bootbox.alert('Record could not be deleted. Please re-try later!!!');
+	            }
+            });
+        });
+
+        $("#btnExport").on("click", function () {
+            $.ajax({
+                url: '@Url.Action("ExcelFile")',
+                type: "Post",
+                dataType: 'json',
+                success: function (data) {
+                    if (data.Status == "00") {
+                        window.location.href = "@Url.RouteUrl(new {Controller = "Contestant", Action = "DownloadExcelFile"})/?fullPath=" + data.Message;
+                    }
+                    else {
+                        bootbox.alert('Export Fail !!');
+                    }
+                }
+            });
+        });
+    </script>
+}
